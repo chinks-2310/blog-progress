@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class UpdateResouceProgress(graphene.Mutation):
     ok = graphene.Boolean()
-    messages = graphene.String()
+    message = graphene.String()
 
     class Arguments:
         user_id = graphene.ID(required=True)
@@ -28,21 +28,30 @@ class UpdateResouceProgress(graphene.Mutation):
             resource_status = ResourceStatus.objects.get(
                 blog__id=blog_id, resource__id=resource_id, user__id=user_id
             )
+            blog_status = BlogStatus.objects.get(blog__id=blog_id, user__id=user_id)
             resource_status.progress_percentage = progress_percentage
-            if progress_percentage == Decimal(100):
-                resource_status.is_completed = True
+            resource_status.is_completed = True
             resource_status.save()
+            resources = ResourceStatus.objects.filter(blog__id=blog_id)
+            completed_resources = ResourceStatus.objects.filter(
+                blog__id=blog_id, is_completed=True
+            )
+            blog_progress_percentage = Decimal(
+                (len(completed_resources) * 100) / len(resources)
+            )
+            blog_status.progress_percentage = blog_progress_percentage
+            blog_status.save()
             logger.info("Resource Progress updated successfully")
             return {
                 "ok": True,
-                "messages": "Resource Progress updated successfully",
+                "message": "Resource Progress updated successfully",
             }
 
         except Exception as e:
             logger.exception(e)
             return {
                 "ok": False,
-                "messages": "Something went wrong while updating the resource progress",
+                "message": "Something went wrong while updating the resource progress",
             }
 
 
@@ -105,10 +114,10 @@ class EnrollInBlog(graphene.Mutation):
                 resource_object_to_create.append(reso)
             ResourceStatus.objects.bulk_create(resource_object_to_create)
             logger.info("Resource status created successfully")
-            logger.info("Enrolled in blog successfully")
+            logger.info("Enrolled in a blog successfully")
             return {
                 "ok": True,
-                "message": "Blog Progress updated successfully",
+                "message": "Enrolled in a blog successfully",
             }
 
         except Exception as e:
@@ -122,3 +131,4 @@ class EnrollInBlog(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     update_resource_progress = UpdateResouceProgress.Field()
     enroll_in_blog = EnrollInBlog.Field()
+    update_blog_progress = UpdateBlogProgress.Field()
