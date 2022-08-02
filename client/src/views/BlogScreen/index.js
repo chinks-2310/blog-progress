@@ -46,7 +46,7 @@ function BlogScreen() {
             <Row>
               <Col span={2}>
                 <Link to={{ pathname: `${blogs?.blogId}` }}>
-                  {blogs?.blogId}
+                  {index+1}
                 </Link>
               </Col>
               <Col span={12}>{blogs?.blogTitle}</Col>
