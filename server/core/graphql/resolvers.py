@@ -76,9 +76,8 @@ class BlogDetailsResolver:
                         resource_progress_percentage = Decimal(0)
 
                     else:
-                        resource_progress_percentage = (
-                            resource_status.progress_percentage
-                        )
+                        resource_progress_percentage = resource_status.progress_percentage
+                        
                 else:
                     resource_progress_percentage = Decimal(0)
                 resource = {
